@@ -15,6 +15,7 @@ MonoBehaviour:
   lanes: 1
   startLane: 0
   growthIncrements: 10
+  maxHorizontalSpeed: 3
   maxSpeed: 2
   maxScale: 2
   isLeanable: 1

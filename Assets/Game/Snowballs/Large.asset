@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: Large
   m_EditorClassIdentifier: 
   lanes: 3
+  startLane: 0
   growthIncrements: 10
+  maxHorizontalSpeed: 1
   maxSpeed: 30
   maxScale: 6
   isLeanable: 1

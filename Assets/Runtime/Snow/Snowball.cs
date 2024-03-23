@@ -24,7 +24,7 @@ namespace Runtime.Snow
                 throw new System.ArgumentException("Lean direction must be either right or left.");
             var child = transform.GetChild(0);
             var scale = transform.localScale.y;
-            return child.position + Vector3.Slerp(Vector3.up, leanDirection, 0.5f) * (scale / 2f);
+            return child.localPosition + Vector3.Slerp(Vector3.up, leanDirection, 0.5f) * (scale / 2f);
         }
 
         private void Start()
@@ -34,8 +34,9 @@ namespace Runtime.Snow
 
         private void Update()
         {
-            SetSpeed();
             SetPlayer();
+            SetSpeed();
+            SetHorizontalSpeed();
             transform.localScale = Vector3.one * Scale;
         }
 
@@ -50,7 +51,7 @@ namespace Runtime.Snow
                 var t = ((float)i + 1) / (state.Lanes + 1);
                 _lanes[i] = Vector3.Slerp(leftLean, rightLean, t);
             }
-            if(_lanes.Length == 1 && state.IsLeanable) _canLean = true;
+            if (_lanes.Length == 1 && state.IsLeanable) _canLean = true;
             _currentLane = state.StartLane;
             inputListener.OnAPress += OnAPress;
             inputListener.OnDPress += OnDPress;
@@ -92,8 +93,16 @@ namespace Runtime.Snow
             var target = _lanes[_currentLane];
             if (_leanLeft) target = GetLeanPosition(Vector3.left);
             if (_leanRight) target = GetLeanPosition(Vector3.right);
-            player.position = target;
+            player.position = transform.position + target;
         }
 
+        private void SetHorizontalSpeed()
+        {
+            var x = player.position.x;
+            var leftLean = transform.position.x + GetLeanPosition(Vector3.left).x;
+            var rightLean = transform.position.x +  GetLeanPosition(Vector3.right).x;
+            var target = (Mathf.InverseLerp(leftLean, rightLean, x) - 0.5f) * 2f;
+            transform.position += Vector3.right * target * ActiveState.MaxHorizontalSpeed * Time.deltaTime;
+        }
     }
 }
