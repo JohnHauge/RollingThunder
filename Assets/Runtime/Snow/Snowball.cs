@@ -1,3 +1,4 @@
+using System;
 using Runtime.ScriptableObjects;
 using UnityEngine;
 
@@ -10,10 +11,13 @@ namespace Runtime.Snow
         [SerializeField] private Transform player;
         [SerializeField] private InputListener inputListener;
         public float Speed { get; private set; } = 0f;
-        public float Scale { get; private set; } = 1f;
-        public SnowballState ActiveState { get; private set; }
+        public float Scale => transform.localScale.x;
+        private int _currentState;
+        public SnowballState ActiveState => snowballStates[_currentState];
         private Vector3[] _lanes;
         private int _currentLane;
+        private int _health;
+        private int _growthIncrements;
         private bool _canLean;
         private bool _leanLeft;
         private bool _leanRight;
@@ -21,15 +25,25 @@ namespace Runtime.Snow
         private Vector3 GetLeanPosition(Vector3 leanDirection)
         {
             if (leanDirection != Vector3.right && leanDirection != Vector3.left)
-                throw new System.ArgumentException("Lean direction must be either right or left.");
+                throw new ArgumentException("Lean direction must be either right or left.");
             var child = transform.GetChild(0);
             var scale = transform.localScale.y;
             return child.localPosition + Vector3.Slerp(Vector3.up, leanDirection, 0.5f) * (scale / 2f);
         }
 
+        private Vector3 GetLanePosition(int lane)
+        {
+            if (lane < 0 || lane >= _lanes.Length)
+                throw new ArgumentOutOfRangeException("Lane index out of range.");
+            var child = transform.GetChild(0);
+            var scale = transform.localScale.y;
+            return _lanes[lane];
+        }
+
         private void Start()
         {
-            SetActiveState(snowballStates[0]);
+            SetActiveState(0);
+            _health = settings.Health;
         }
 
         private void Update()
@@ -37,12 +51,12 @@ namespace Runtime.Snow
             SetPlayer();
             SetSpeed();
             SetHorizontalSpeed();
-            transform.localScale = Vector3.one * Scale;
         }
 
-        private void SetActiveState(SnowballState state)
+        private void SetActiveState(int index)
         {
-            ActiveState = state;
+            _currentState = index;
+            var state = snowballStates[index];
             _lanes = new Vector3[state.Lanes];
             var leftLean = GetLeanPosition(Vector3.left);
             var rightLean = GetLeanPosition(Vector3.right);
@@ -88,19 +102,44 @@ namespace Runtime.Snow
             _canLean = ActiveState.IsLeanable && _currentLane == _lanes.Length - 1;
         }
 
+        public void OnSnowPileCollision()
+        {
+            if (_health < settings.Health) _health++;
+            else
+            {
+                _growthIncrements++;
+                if (_growthIncrements <= ActiveState.GrowthIncrements)
+                {
+                    Debug.Log("Growth increment: " + _growthIncrements);
+                    var t = (float)_growthIncrements / ActiveState.GrowthIncrements;
+                    Debug.Log("t: " + t);
+                    var maxScale = ActiveState.MaxScale;
+                    var minScale =_currentState > 0 ? snowballStates[_currentState - 1].MaxScale : 1f;
+                    transform.localScale = Vector3.Lerp(Vector3.one * minScale, Vector3.one * maxScale, t);
+                }
+            }
+
+        }
+
+        private void Die()
+        {
+            throw new NotImplementedException();
+        }
+
         private void SetPlayer()
         {
             var target = _lanes[_currentLane];
             if (_leanLeft) target = GetLeanPosition(Vector3.left);
             if (_leanRight) target = GetLeanPosition(Vector3.right);
-            player.position = transform.position + target;
+            target.y += transform.localScale.y / 4f;
+            player.position = .position + target;
         }
 
         private void SetHorizontalSpeed()
         {
             var x = player.position.x;
             var leftLean = transform.position.x + GetLeanPosition(Vector3.left).x;
-            var rightLean = transform.position.x +  GetLeanPosition(Vector3.right).x;
+            var rightLean = transform.position.x + GetLeanPosition(Vector3.right).x;
             var target = (Mathf.InverseLerp(leftLean, rightLean, x) - 0.5f) * 2f;
             transform.position += Vector3.right * target * ActiveState.MaxHorizontalSpeed * Time.deltaTime;
         }
