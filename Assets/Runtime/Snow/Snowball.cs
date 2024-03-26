@@ -38,11 +38,17 @@ namespace Runtime.Snow
         {
             var leftLean = GetLeanPosition(Vector3.left);
             var rightLean = GetLeanPosition(Vector3.right);
-            var state = snowballStates[_currentState];
-            var t = ((float)lane + 1) / (state.Lanes + 1);
+            var t = ((float)lane + 1) / (ActiveState.Lanes + 1);
             var point = Vector3.Lerp(leftLean, rightLean, t);
             var direction = (point - transform.position).normalized;
             return transform.position + direction * transform.localScale.x;;
+        }
+
+        private float GetLanePoint(int lane){
+            var leftLean = GetLeanPosition(Vector3.left).x;
+            var rightLean = GetLeanPosition(Vector3.right).x;
+            var t = ((float)lane + 1) / (ActiveState.Lanes + 1);
+            return (t * 2f) - 1f;
         }
 
         private void Start()
@@ -54,9 +60,9 @@ namespace Runtime.Snow
 
         private void Update()
         {
-            SetPlayer();
+            SetPlayerPosition();
             SetSpeed();
-            SetHorizontalSpeed();
+            SetHorizontalMovement();
         }
 
         private void SetActiveState(int index)
@@ -109,13 +115,11 @@ namespace Runtime.Snow
                 {
                     Debug.Log("Growth increment: " + _growthIncrements);
                     var t = (float)_growthIncrements / ActiveState.GrowthIncrements;
-                    Debug.Log("t: " + t);
                     var maxScale = ActiveState.MaxScale;
                     var minScale =_currentState > 0 ? snowballStates[_currentState - 1].MaxScale : 1f;
                     transform.localScale = Vector3.Lerp(Vector3.one * minScale, Vector3.one * maxScale, t);
                 }
             }
-
         }
 
         private void Die()
@@ -123,7 +127,7 @@ namespace Runtime.Snow
             throw new NotImplementedException();
         }
 
-        private void SetPlayer()
+        private void SetPlayerPosition()
         {
             var target = GetLanePosition(_currentLane);
             if (_leanLeft) target = GetLeanPosition(Vector3.left);
@@ -131,13 +135,14 @@ namespace Runtime.Snow
             player.position = target;
         }
 
-        private void SetHorizontalSpeed()
+        private void SetHorizontalMovement()
         {
-            var x = 0f;
-            x += _leanLeft ? -1f : 0f;
-            x += _leanRight ? 1f : 0f;
+            var x = GetLanePoint(_currentLane);
+            x = _leanLeft ? -1f : x;
+            x = _leanRight ? 1f : x;
+            Debug.Log(x);
             var target = new Vector3(x, 0f, 0f);
-            transform.position += target * ActiveState.MaxHorizontalSpeed * Time.deltaTime;
+            transform.position += ActiveState.MaxHorizontalSpeed * Time.deltaTime * target;
         }
 
         private void OnDrawGizmos() {
