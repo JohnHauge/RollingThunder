@@ -45,8 +45,6 @@ namespace Runtime.Snow
         }
 
         private float GetLanePoint(int lane){
-            var leftLean = GetLeanPosition(Vector3.left).x;
-            var rightLean = GetLeanPosition(Vector3.right).x;
             var t = ((float)lane + 1) / (ActiveState.Lanes + 1);
             return (t * 2f) - 1f;
         }
@@ -122,8 +120,16 @@ namespace Runtime.Snow
             }
         }
 
+        public void OnHazzardCollision()
+        {
+            if (_health > 0) _health--;
+            else Die();
+            Debug.Log("Health: " + _health);
+        }
+
         private void Die()
         {
+            Debug.Log("You died!");
             throw new NotImplementedException();
         }
 
@@ -140,7 +146,6 @@ namespace Runtime.Snow
             var x = GetLanePoint(_currentLane);
             x = _leanLeft ? -1f : x;
             x = _leanRight ? 1f : x;
-            Debug.Log(x);
             var target = new Vector3(x, 0f, 0f);
             transform.position += ActiveState.MaxHorizontalSpeed * Time.deltaTime * target;
         }
