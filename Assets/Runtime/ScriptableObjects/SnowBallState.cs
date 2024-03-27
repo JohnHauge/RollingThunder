@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Runtime.Snow
+namespace Runtime.Game
 {
     [CreateAssetMenu(fileName = "NewSnowballState", menuName = "ScriptableObjects/SnowballState")]
     public class SnowballState : ScriptableObject
@@ -11,7 +11,6 @@ namespace Runtime.Snow
         [SerializeField] private float maxHorizontalSpeed;
         [SerializeField] private float maxSpeed;
         [SerializeField] private float maxScale;
-        [SerializeField] private bool isLeanable;
 
         public int Lanes => lanes;
         public int StartLane => startLane;
@@ -19,6 +18,5 @@ namespace Runtime.Snow
         public float MaxHorizontalSpeed => maxHorizontalSpeed;
         public float MaxSpeed => maxSpeed;
         public float MaxScale => maxScale;
-        public bool IsLeanable => isLeanable;
     }
 }

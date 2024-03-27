@@ -1,5 +1,5 @@
 using Runtime.Interfaces;
-using Runtime.Snow;
+using Runtime.Game;
 using UnityEngine;
 
 public class HazzardObject : MonoBehaviour, ILaneObject

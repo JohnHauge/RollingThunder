@@ -12,10 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c577a868504aeb348990c417092100d3, type: 3}
   m_Name: Medium
   m_EditorClassIdentifier: 
-  lanes: 3
+  lanes: 2
   startLane: 0
   growthIncrements: 10
   maxHorizontalSpeed: 2
   maxSpeed: 0
   maxScale: 4
-  isLeanable: 0
