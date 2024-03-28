@@ -267,6 +267,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   snowball: {fileID: 106765208}
+  speed: 5
 --- !u!95 &61281594
 Animator:
   serializedVersion: 5
@@ -3002,6 +3003,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   snowball: {fileID: 106765208}
+  speed: 0
 --- !u!1 &2116656557
 GameObject:
   m_ObjectHideFlags: 0

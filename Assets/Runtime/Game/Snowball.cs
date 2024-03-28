@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Runtime.Interfaces;
 using Runtime.ScriptableObjects;
 using UnityEngine;
@@ -10,6 +11,7 @@ namespace Runtime.Game
         [SerializeField] private GameSettings settings;
         [SerializeField] private Slope slope;
         [SerializeField] private SnowballState[] snowballStates;
+        private readonly Dictionary<SnowballState, int> _incrementValues = new();
         public float Speed { get; private set; } = 0f;
         public float Scale => transform.localScale.x;
         private int _currentState;
@@ -18,7 +20,7 @@ namespace Runtime.Game
         private int _growthIncrements;
         public bool IsLeaningLeft { get; private set; }
         public bool IsLeaningRight { get; private set; }
-
+        private Renderer _renderer;
         private Vector3 GetLeanPosition(Vector3 leanDirection)
         {
             if (leanDirection != Vector3.right && leanDirection != Vector3.left)
@@ -42,10 +44,19 @@ namespace Runtime.Game
             return transform.position + direction * transform.localScale.x; ;
         }
 
-        private void Start()
+        private void Awake()
         {
-            SetActiveState(0);
+            _renderer = GetComponentInChildren<Renderer>();
+            var increment = 0;
+            foreach (var state in snowballStates)
+            {
+                increment += state.GrowthIncrements;
+                _incrementValues.Add(state, increment);
+            }
         }
+
+        //TODO : Start the game from a different class.
+        private void Start() => SetActiveState(0);
 
         private void Update()
         {
@@ -58,6 +69,7 @@ namespace Runtime.Game
             _currentState = index;
             var state = snowballStates[index];
             _currentLane = state.StartLane;
+            _renderer.material.SetInt("_Lanes", state.Lanes);
         }
 
         private void SetSpeed()
@@ -80,32 +92,39 @@ namespace Runtime.Game
             else if (direction == Vector3.right) IsLeaningRight = false;
         }
 
-        public void OnSnowPileCollision()
-        {
-            _growthIncrements++;
-            if (_growthIncrements <= ActiveState.GrowthIncrements) UpdateScale(1);
-            else if (_currentState + 1 < snowballStates.Length) SetActiveState(_currentState + 1);
-        }
+        public void OnSnowPileCollision() => UpdateScale(1);
+        public void OnHazzardCollision() => UpdateScale(-5);
 
-        public void OnHazzardCollision()
-        {
-            if (_growthIncrements > 5) UpdateScale(-5);
-            else Die();
-        }
 
-        private void Die()
-        {
-            Debug.Log("You died!");
-            throw new NotImplementedException();
-        }
         private void UpdateScale(int increments = 0)
         {
             _growthIncrements += increments;
-            var t = (float)_growthIncrements / ActiveState.GrowthIncrements;
-            var maxScale = ActiveState.MaxScale;
-            var minScale = _currentState > 0 ? snowballStates[_currentState - 1].MaxScale : 1f;
-            transform.localScale = Vector3.Lerp(Vector3.one * minScale, Vector3.one * maxScale, t);
+            CheckState();
+            if (_growthIncrements < 0) Die();
+            else
+            {
+                Debug.Log(_growthIncrements);
+                var t = (float)_growthIncrements / _incrementValues[ActiveState];
+                var maxScale = ActiveState.MaxScale;
+                var minScale = _currentState > 0 ? snowballStates[_currentState - 1].MaxScale : 1f;
+                transform.localScale = Vector3.Lerp(Vector3.one * minScale, Vector3.one * maxScale, t);
+            }
         }
+
+        private void CheckState()
+        {
+            if (_currentState == snowballStates.Length - 1) return;
+            if (_growthIncrements >= _incrementValues[ActiveState])
+            {
+                SetActiveState(_currentState + 1); 
+                return;
+            }
+            if (_currentState > 0) return;
+            var previousState = snowballStates[_currentState];
+            if (_growthIncrements < previousState.GrowthIncrements) return;
+            SetActiveState(_currentState - 1);
+        }
+
         private void UpdateMovement()
         {
             var x = ((float)_currentLane + 1) / (ActiveState.Lanes + 1); ;
@@ -116,6 +135,12 @@ namespace Runtime.Game
             if (transform.position.x + target.x - transform.localScale.x < slope.LeftEdge && x < 0f) return;
             if (transform.position.x + target.x + transform.localScale.x > slope.RightEdge && x > 0f) return;
             transform.position += target;
+        }
+
+        private void Die()
+        {
+            Debug.Log("You died!");
+            throw new NotImplementedException();
         }
     }
 }
