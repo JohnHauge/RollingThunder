@@ -12,6 +12,7 @@ namespace Runtime.Game
         [SerializeField] private SnowballState[] snowballStates;
         public SnowballState[] SnowballStates => snowballStates;
         public float Speed { get; private set; } = 0f;
+        public float Angle { get; private set; } = 0f;
         private int _currentState;
         public SnowballState ActiveState => snowballStates[_currentState];
         private int _currentLane;
@@ -42,6 +43,41 @@ namespace Runtime.Game
             return transform.position + direction * transform.localScale.x; ;
         }
 
+        public int GetClosestLaneIndex(Vector3 position)
+        {
+            var leftLean = GetLeanPosition(Vector3.left);
+            var rightLean = GetLeanPosition(Vector3.right);
+            var closestLaneIndex = 0;
+            var closestDistance = float.MaxValue;
+
+            for (int i = 0; i < ActiveState.Lanes; i++)
+            {
+                var t = ((float)i + 1) / (ActiveState.Lanes + 1);
+                var point = Vector3.Lerp(leftLean, rightLean, t);
+                var direction = (point - transform.position).normalized;
+                var lanePosition = transform.position + direction * transform.localScale.x;
+                var distance = Vector3.Distance(position, lanePosition);
+
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    closestLaneIndex = i;
+                }
+            }
+            return closestLaneIndex;
+        }
+
+        public Vector3 GetClosestLanePosition(Vector3 position)
+        {
+            var leftLean = GetLeanPosition(Vector3.left);
+            var rightLean = GetLeanPosition(Vector3.right);
+            var closestLaneIndex = GetClosestLaneIndex(position);
+            var t = ((float)closestLaneIndex + 1) / (ActiveState.Lanes + 1);
+            var point = Vector3.Lerp(leftLean, rightLean, t);
+            var direction = (point - transform.position).normalized;
+            return transform.position + direction * transform.localScale.x;
+        }
+
         private void Awake()
         {
             _renderer = GetComponentInChildren<Renderer>();
@@ -56,13 +92,18 @@ namespace Runtime.Game
             var t = Scale.NominalizedIncrements;
             Speed = Mathf.Lerp(ActiveState.Speed.From, ActiveState.Speed.To, t);
             UpdateMovement();
+            // rotate the snowball base on the speed.
+            Angle += Speed * Time.deltaTime * 25f;
+            transform.GetChild(0).Rotate(Vector3.right, Speed * Time.deltaTime * 25f);
         }
 
         private void SetActiveState(int index)
         {
+            if(index >= snowballStates.Length) return;
+            var lanePosition = GetLanePosition();
             _currentState = index;
             var state = snowballStates[index];
-            _currentLane = state.StartLane;
+            _currentLane = GetClosestLaneIndex(lanePosition);
             _renderer.material.SetInt("_Lanes", state.Lanes);
         }
 
@@ -87,7 +128,7 @@ namespace Runtime.Game
             var state = _currentState;
             if (increments < 0) state--;
             else if (increments > SnowballStates[_currentState].GrowthIncrements) state++;
-            if(state < 0) Die(); 
+            if (state < 0) Die();
             else if (state != _currentState) SetActiveState(state);
         }
 

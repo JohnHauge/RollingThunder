@@ -17,8 +17,8 @@ MonoBehaviour:
   growthIncrements: 10
   maxHorizontalSpeed: 1
   speed:
-    From: 6
-    To: 9
+    From: 9
+    To: 12
   scale:
-    From: 6
-    To: 9
+    From: 4
+    To: 6

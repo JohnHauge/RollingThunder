@@ -10,8 +10,9 @@ namespace Runtime.Game
         private void Start() => _snowball = GetComponent<Snowball>();
         private void OnTriggerEnter(Collider other)
         {
+            if(other.CompareTag("Player")) return;
             if (!other.transform.TryGetComponent<ILaneObject>(out var laneObject)) return;
-            laneObject.OnSlopeLaneHit(_snowball);
+            laneObject.OnHit(_snowball);
         }
     }
 }

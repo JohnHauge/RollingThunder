@@ -10,6 +10,7 @@ namespace Runtime.Game
         private int _growthIncrements;
         public int GrowthIncrements => _growthIncrements;
         public float NominalizedIncrements => GetNominalizedIncrements();
+
         public SnowballScaleHandler(Snowball snowball)
         {
             _snowball = snowball;
@@ -28,7 +29,6 @@ namespace Runtime.Game
             _snowball.CheckState(GetIncrementsInState());
             var state = _snowball.ActiveState;
             var t = GetNominalizedIncrements();
-            Debug.Log(t);
             var scale = Mathf.Lerp(state.Scale.From, state.Scale.To, t);
             _snowball.transform.localScale = Vector3.one * scale;
         }
@@ -47,7 +47,6 @@ namespace Runtime.Game
         private float GetNominalizedIncrements()
             => (float)GetIncrementsInState() / _snowball.ActiveState.GrowthIncrements;
         
-
         public void Grow() => SetScale(1);
         public void Shrink(int increments) => SetScale(-increments);
         public void Reset()
