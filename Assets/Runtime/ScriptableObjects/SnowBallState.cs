@@ -1,5 +1,5 @@
 using UnityEngine;
-
+using System;
 namespace Runtime.Game
 {
     [CreateAssetMenu(fileName = "NewSnowballState", menuName = "ScriptableObjects/SnowballState")]
@@ -9,14 +9,21 @@ namespace Runtime.Game
         [SerializeField] private int startLane;
         [SerializeField] private int growthIncrements;
         [SerializeField] private float maxHorizontalSpeed;
-        [SerializeField] private float maxSpeed;
-        [SerializeField] private float maxScale;
+        [SerializeField] private FromTo speed;
+        [SerializeField] private FromTo scale;
 
         public int Lanes => lanes;
         public int StartLane => startLane;
         public int GrowthIncrements => growthIncrements;
         public float MaxHorizontalSpeed => maxHorizontalSpeed;
-        public float MaxSpeed => maxSpeed;
-        public float MaxScale => maxScale;
+        public FromTo Speed => speed;
+        public FromTo Scale => scale;
+    }
+
+    [Serializable]
+    public struct FromTo
+    {
+        public float From;
+        public float To;
     }
 }

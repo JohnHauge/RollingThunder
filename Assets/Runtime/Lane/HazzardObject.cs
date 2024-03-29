@@ -5,24 +5,34 @@ using UnityEngine;
 public class HazzardObject : MonoBehaviour, ILaneObject
 {
     [SerializeField] private float minConsumeScale = 3f;
+    [SerializeField] private int damage = 1;
     [SerializeField] private GameObject slopeObject;
     [SerializeField] private GameObject snowballObject;
 
-    private void OnEnable() 
+    private void OnEnable()
     {
         slopeObject.SetActive(true);
         snowballObject.SetActive(false);
     }
 
+    private void OnDisable()
+    {
+        slopeObject.SetActive(false);
+        snowballObject.SetActive(false);
+    }
+
     public void OnSlopeLaneHit(Snowball snowball)
     {
-        if(snowball.Scale < minConsumeScale) snowball.OnHazzardCollision();
-        else slopeObject.gameObject.SetActive(false); //TODO : This should put the object onto the snowball.
+        if (snowball.transform.localScale.x < minConsumeScale) snowball.OnHazzardCollision(damage);
+        // else -> TODO : This should put the object onto the snowball.
+        enabled = false;
     }
 
     public void OnSnowballLaneHit(Snowball snowball)
     {
-        snowball.OnHazzardCollision();
+
+        //snowball.OnHazzardCollision();
         snowballObject.gameObject.SetActive(false);
+        enabled = false;
     }
 }
