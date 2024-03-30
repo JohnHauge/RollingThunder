@@ -20,5 +20,5 @@ MonoBehaviour:
     From: 6
     To: 9
   scale:
-    From: 2
-    To: 4
+    From: 1.5
+    To: 3
