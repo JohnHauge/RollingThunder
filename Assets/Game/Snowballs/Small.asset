@@ -15,10 +15,10 @@ MonoBehaviour:
   lanes: 1
   startLane: 0
   growthIncrements: 10
-  maxHorizontalSpeed: 3
+  maxHorizontalSpeed: 5
   speed:
     From: 3
     To: 6
   scale:
     From: 1
-    To: 1.5
+    To: 2

@@ -141,8 +141,10 @@ namespace Runtime.Game
             x = IsLeaningRight ? 1f : x;
             transform.eulerAngles = new Vector3(0f, MaxYRotation * x , 0f);
             var target = ActiveState.MaxHorizontalSpeed * Time.deltaTime * new Vector3(x, 0f, 0f);
-            if (transform.position.x + target.x - transform.localScale.x < slope.LeftEdge && x < 0f) return;
-            if (transform.position.x + target.x + transform.localScale.x > slope.RightEdge && x > 0f) return;
+            //if (transform.position.x + target.x - transform.localScale.x < slope.LeftEdge && x < 0f) return;
+            //if (transform.position.x + target.x + transform.localScale.x > slope.RightEdge && x > 0f) return;
+            if (transform.position.x + target.x < slope.LeftEdge && x < 0f) return;
+            if (transform.position.x + target.x > slope.RightEdge && x > 0f) return;
             transform.position += target;
         }
 

@@ -269,7 +269,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   snowball: {fileID: 106765208}
-  speed: 5
+  speed: 10
 --- !u!95 &61281594
 Animator:
   serializedVersion: 5
@@ -1760,6 +1760,7 @@ MonoBehaviour:
     type: 3}
   hazzardObjects:
   - {fileID: 9033011617918048726, guid: b4c04081a64236d409cfb068c82d9c57, type: 3}
+  - {fileID: 9033011617918048726, guid: e7dac6695dc5b69439cb4543d1e70d37, type: 3}
 --- !u!4 &1163291934
 Transform:
   m_ObjectHideFlags: 0
