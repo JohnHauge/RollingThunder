@@ -7,6 +7,7 @@ namespace Runtime.Game
 {
     public class Snowball : MonoBehaviour, IMoveable
     {
+        private const float MaxYRotation = 25f;
         [SerializeField] private GameSettings settings;
         [SerializeField] private Slope slope;
         [SerializeField] private SnowballState[] snowballStates;
@@ -94,7 +95,7 @@ namespace Runtime.Game
             UpdateMovement();
             // rotate the snowball base on the speed.
             Angle += Speed * Time.deltaTime * 25f;
-            transform.GetChild(0).Rotate(Vector3.right, Speed * Time.deltaTime * 25f);
+            transform.GetChild(0).Rotate(Vector3.right, Speed * Time.deltaTime * 30f);
         }
 
         private void SetActiveState(int index)
@@ -138,6 +139,7 @@ namespace Runtime.Game
             x = (x * 2f) - 1f;
             x = IsLeaningLeft ? -1f : x;
             x = IsLeaningRight ? 1f : x;
+            transform.eulerAngles = new Vector3(0f, MaxYRotation * x , 0f);
             var target = ActiveState.MaxHorizontalSpeed * Time.deltaTime * new Vector3(x, 0f, 0f);
             if (transform.position.x + target.x - transform.localScale.x < slope.LeftEdge && x < 0f) return;
             if (transform.position.x + target.x + transform.localScale.x > slope.RightEdge && x > 0f) return;

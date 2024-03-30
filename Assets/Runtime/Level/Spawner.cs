@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Runtime.Core;
 using Runtime.Game;
 using Runtime.Level;
 using UnityEngine;
@@ -9,52 +10,37 @@ namespace Level
     {
         [SerializeField] private Slope slope;
         [SerializeField] private Snowball snowball;
-        [SerializeField] private LaneObject snowPilePrefab;
-        [SerializeField] private LaneObject[] hazzardObjects;
-        private readonly List<LaneObject> laneObjects = new();
+        [SerializeField] private GameObject snowPilePrefab;
+        [SerializeField] private GameObject[] hazzardObjects;
+        private readonly Dictionary<GameObject, LaneObjectPool> objectPools = new();
         private Vector3 RandomSpawnPoint => slope.LaneStartPoints[Random.Range(0, slope.Lanes)];
-        private LaneObject RandomHazzardObject => hazzardObjects[Random.Range(0, hazzardObjects.Length)];
+        private GameObject RandomHazzardObject => hazzardObjects[Random.Range(0, hazzardObjects.Length)];
+        
         
         private void Start()
         {
+            objectPools.Add(snowPilePrefab, new LaneObjectPool(snowball, snowPilePrefab, 10));
+            foreach (var hazzardObject in hazzardObjects)
+                objectPools.Add(hazzardObject, new LaneObjectPool(snowball, hazzardObject, 10));
+            
             InvokeRepeating(nameof(SpawnSnow), 0f, 2f); // TODO : Change this
             InvokeRepeating(nameof(SpawnHazzard), 0f, 2.5f); // TODO : Change this
         }
 
         private void SpawnSnow()
         {
+            if(!objectPools.ContainsKey(snowPilePrefab)) return;
+            var laneObject = objectPools[snowPilePrefab].Get().GetComponent<LaneObject>();
             var spawnPoint = RandomSpawnPoint;
-            var laneObject = Instantiate(snowPilePrefab, spawnPoint, Quaternion.identity);
-            laneObjects.Add(laneObject);
+            laneObject.transform.position = spawnPoint;
         }
 
         private void SpawnHazzard()
         {
+            if(!objectPools.ContainsKey(RandomHazzardObject)) return;
+            var laneObject = objectPools[RandomHazzardObject].Get().GetComponent<LaneObject>();
             var spawnPoint = RandomSpawnPoint;
-            var laneObject = Instantiate(RandomHazzardObject, spawnPoint, Quaternion.identity) as HazzardObject;
-            laneObject.OnHazzardCollision += OnHazzardSnowballCollision;
-            laneObjects.Add(laneObject);
-        }
-
-        private void OnHazzardSnowballCollision(HazzardObject hazzardObject)
-        {
-            Debug.Log("Hazzard Snowball Collision");
-            laneObjects.Remove(hazzardObject);
-            //TODO : Implement
-        }
-
-        private void Update()
-        {
-            var objects = new List<LaneObject>(laneObjects);
-            foreach (var laneObject in objects) //TODO : Object pooling
-            {
-                laneObject.transform.position += Vector3.back * snowball.Speed * Time.deltaTime;
-                if (laneObject.transform.position.z < -5f || laneObject.gameObject.activeSelf == false)
-                {
-                    laneObjects.Remove(laneObject);
-                    Destroy(laneObject.gameObject);
-                }
-            }
+            laneObject.transform.position = spawnPoint;
         }
     }
 }

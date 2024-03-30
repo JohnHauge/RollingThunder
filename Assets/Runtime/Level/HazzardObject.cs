@@ -7,20 +7,20 @@ namespace Runtime.Level
 {
     public class HazzardObject : LaneObject
     {
-        public event Action<HazzardObject> OnHazzardCollision;
-
         [SerializeField] private float minConsumeScale = 3f;
         [SerializeField] private int damage = 1;
         [SerializeField] private GameObject slopeObject;
         [SerializeField] private GameObject snowballObject;
+        public override Snowball Snowball { get; set; }
 
         private void OnEnable()
         {
+            move = true;
             slopeObject.SetActive(true);
             snowballObject.SetActive(false);
         }
 
-        private void OnDisable()
+        protected void OnDisable()
         {
             slopeObject.SetActive(false);
             snowballObject.SetActive(false);
@@ -31,17 +31,18 @@ namespace Runtime.Level
             if (snowball.transform.localScale.x < minConsumeScale)
             {
                 snowball.OnHazzardCollision(damage);
-                gameObject.SetActive(false);
+                ReturnToPool();
             }
             else
             {
-                OnHazzardCollision?.Invoke(this);
+                move = false;
+                transform.SetParent(null);
                 slopeObject.SetActive(false);
                 snowballObject.SetActive(true);
                 var snowballChild = snowball.transform.GetChild(0);
                 var position = snowball.GetClosestLanePosition(transform.position);
                 position.y -= snowball.transform.localScale.x; 
-                transform.localPosition = position;
+                transform.position = position;
                 transform.SetParent(snowballChild);
                 transform.eulerAngles = new Vector3(0f, 0f, 180f);
                 StartCoroutine(RotationTrackerRoutine(snowball));
@@ -57,7 +58,7 @@ namespace Runtime.Level
                 currentAngle = snowball.Angle - startAngle;
                 yield return null;
             }
-            Destroy(gameObject);
+            ReturnToPool();
         }
     }
 }
