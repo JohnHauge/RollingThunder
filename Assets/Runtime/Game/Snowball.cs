@@ -11,8 +11,8 @@ namespace Runtime.Game
         [SerializeField] private GameSettings settings;
         [SerializeField] private Slope slope;
         [SerializeField] private SnowballState[] snowballStates;
+        [SerializeField] private GameObject virtualCamera;
         public SnowballState[] SnowballStates => snowballStates;
-        public float Speed { get; private set; } = 0f;
         public float Angle { get; private set; } = 0f;
         private int _currentState;
         public SnowballState ActiveState => snowballStates[_currentState];
@@ -83,24 +83,38 @@ namespace Runtime.Game
         {
             _renderer = GetComponentInChildren<Renderer>();
             Scale = new SnowballScaleHandler(this);
+            GameManager.OnGameStart += StartSnowball;
+            enabled = false;
         }
 
-        //TODO : Start the game from a different class.
-        private void Start() => SetActiveState(0);
+        private void OnDestroy()
+        {
+            GameManager.OnGameStart -= StartSnowball;
+        }
+
+        private void StartSnowball()
+        {
+            SetActiveState(0);
+            virtualCamera.SetActive(true);
+            enabled = true;
+        }
+
+        public void StopSnowBall()
+        {
+
+        }
 
         private void Update()
         {
-            var t = Scale.NominalizedIncrements;
-            Speed = Mathf.Lerp(ActiveState.Speed.From, ActiveState.Speed.To, t);
+            var speed = GameManager.Instance.GameSpeed;
             UpdateMovement();
-            // rotate the snowball base on the speed.
-            Angle += Speed * Time.deltaTime * 25f;
-            transform.GetChild(0).Rotate(Vector3.right, Speed * Time.deltaTime * 30f);
+            Angle += speed * Time.deltaTime * 25f;
+            transform.GetChild(0).Rotate(Vector3.right, speed * Time.deltaTime * 30f);
         }
 
         private void SetActiveState(int index)
         {
-            if(index >= snowballStates.Length) return;
+            if (index >= snowballStates.Length) return;
             var lanePosition = GetLanePosition();
             _currentState = index;
             var state = snowballStates[index];
@@ -139,10 +153,8 @@ namespace Runtime.Game
             x = (x * 2f) - 1f;
             x = IsLeaningLeft ? -1f : x;
             x = IsLeaningRight ? 1f : x;
-            transform.eulerAngles = new Vector3(0f, MaxYRotation * x , 0f);
+            transform.eulerAngles = new Vector3(0f, MaxYRotation * x, 0f);
             var target = ActiveState.MaxHorizontalSpeed * Time.deltaTime * new Vector3(x, 0f, 0f);
-            //if (transform.position.x + target.x - transform.localScale.x < slope.LeftEdge && x < 0f) return;
-            //if (transform.position.x + target.x + transform.localScale.x > slope.RightEdge && x > 0f) return;
             if (transform.position.x + target.x < slope.LeftEdge && x < 0f) return;
             if (transform.position.x + target.x > slope.RightEdge && x > 0f) return;
             transform.position += target;
@@ -152,6 +164,10 @@ namespace Runtime.Game
         {
             Debug.Log("You died!");
             throw new NotImplementedException();
+        }
+
+        private void OnMouseDown() {
+            GameManager.Instance.StartGame();
         }
     }
 }

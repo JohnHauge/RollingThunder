@@ -17,9 +17,8 @@ namespace Runtime.Level
         
         public virtual void Update()
         {
-            if(!Snowball || !move) return;
-            var travelSpeed = (Snowball.Speed - speed) * Time.deltaTime;
-            transform.position += Vector3.back * travelSpeed;
+            if (!move) return;
+            transform.position += Vector3.back * (GameManager.Instance.GameSpeed - speed) * Time.deltaTime;
             if(transform.position.z < -10) ReturnToPool();
         }
 

@@ -12,5 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c6f026bafd81cf47afa247757f85ba3, type: 3}
   m_Name: Game Settings
   m_EditorClassIdentifier: 
-  SpeedModifier: 2
-  ScaleSpeed: 0.1
+  acceleration: 0.3
+  maxSpeed: 10
+  startSpeed: 1
