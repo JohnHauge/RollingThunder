@@ -1,3 +1,4 @@
+using System.Collections;
 using Runtime.Interfaces;
 using UnityEngine;
 
@@ -7,6 +8,7 @@ namespace Runtime.Game
     {
         [SerializeField] private Snowball snowball;
         [SerializeField] private float speed;
+        [SerializeField] private Vector3 offset;
         
         private Animator _animator;
         private float TravelSpeed => GameManager.Instance.GameSpeed;
@@ -34,7 +36,7 @@ namespace Runtime.Game
         private void OnGameEnd()
         {
             enabled = false;
-            _animator.SetBool("IsPlaying", false);
+            StartCoroutine(OnFallRoutine());
         }
 
         private void Update()
@@ -43,12 +45,30 @@ namespace Runtime.Game
             _animator.SetBool("IsLeaningLeft", snowball.IsLeaningLeft);
             _animator.SetBool("IsLeaningRight", snowball.IsLeaningRight);
             transform.position = Vector3.MoveTowards(transform.position, 
-                snowball.GetLanePosition(), speed * Time.deltaTime);
+                snowball.GetLanePosition() + offset, speed * Time.deltaTime);
         }
 
         private void OnTriggerEnter(Collider other) {
             if(other.CompareTag("Player")) return;
             if (!other.transform.TryGetComponent<ILaneObject>(out var laneObject)) return;
+            GameManager.Instance.GameOver();
+        }
+
+        private IEnumerator OnFallRoutine()
+        {
+            _animator.SetBool("IsPlaying", false);
+            var t = 0f;
+            var fromPosition = transform.position;
+            var targetPosition = transform.position;
+            targetPosition.z += 2f;
+            targetPosition.y = 0f;
+            while (t < 1f)
+            {
+                t += Time.deltaTime;
+                transform.position = Vector3.Lerp(fromPosition, targetPosition, t);
+                yield return null;
+            }
+            _animator.SetBool("InGround", true);
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using Runtime.Interfaces;
 using Runtime.ScriptableObjects;
 using UnityEngine;
@@ -13,6 +14,7 @@ namespace Runtime.Game
         [SerializeField] private SnowballState[] snowballStates;
         [SerializeField] private GameObject virtualCamera;
         public SnowballState[] SnowballStates => snowballStates;
+        public bool CanMove { get; private set;}
         public float Angle { get; private set; } = 0f;
         private int _currentState;
         public SnowballState ActiveState => snowballStates[_currentState];
@@ -84,24 +86,29 @@ namespace Runtime.Game
             _renderer = GetComponentInChildren<Renderer>();
             Scale = new SnowballScaleHandler(this);
             GameManager.OnGameStart += StartSnowball;
+            GameManager.OnGameEnd += StopSnowBall;
             enabled = false;
         }
 
         private void OnDestroy()
         {
             GameManager.OnGameStart -= StartSnowball;
+            GameManager.OnGameEnd -= StopSnowBall;
         }
 
         private void StartSnowball()
         {
             SetActiveState(0);
+            CanMove = true;
             virtualCamera.SetActive(true);
             enabled = true;
         }
 
         public void StopSnowBall()
         {
-
+            CanMove = false;
+            enabled = false;
+            StartCoroutine(RollOutRoutine());
         }
 
         private void Update()
@@ -168,6 +175,19 @@ namespace Runtime.Game
 
         private void OnMouseDown() {
             GameManager.Instance.StartGame();
+        }
+
+        private IEnumerator RollOutRoutine()
+        {
+            var target = transform.position + Vector3.back * 10f;
+            var speed = GameManager.Instance.GameSpeed;
+            Debug.Log("Rolling out");
+            while (transform.position.z > target.z)
+            {
+                transform.position = Vector3.MoveTowards(transform.position, target, Time.deltaTime * speed);
+                yield return null;
+            }
+            Debug.Log("Rolled out");
         }
     }
 }

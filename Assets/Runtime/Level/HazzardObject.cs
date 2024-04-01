@@ -8,9 +8,9 @@ namespace Runtime.Level
     public class HazzardObject : LaneObject
     {
         [SerializeField] private float minConsumeScale = 3f;
-        [SerializeField] private int damage = 1;
         [SerializeField] private GameObject slopeObject;
         [SerializeField] private GameObject snowballObject;
+        [SerializeField] private PointValueType pointValueType;
         public override Snowball Snowball { get; set; }
 
         private void OnEnable()
@@ -30,7 +30,7 @@ namespace Runtime.Level
         {
             if (snowball.transform.localScale.x < minConsumeScale)
             {
-                snowball.OnHazzardCollision(damage);
+                GameManager.Instance.GameOver();
                 ReturnToPool();
             }
             else
@@ -58,6 +58,7 @@ namespace Runtime.Level
                 currentAngle = snowball.Angle - startAngle;
                 yield return null;
             }
+            ScoreHandler.AddScore(pointValueType);
             ReturnToPool();
         }
     }

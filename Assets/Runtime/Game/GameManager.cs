@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using Runtime.ScriptableObjects;
+using UnityEngine.SceneManagement;
 
 namespace Runtime.Game
 {
@@ -11,6 +12,8 @@ namespace Runtime.Game
         public static event Action OnGameEnd;
         public float GameSpeed { get; private set; } = 0f;
         public float TravelSpeed => GameSpeed * Time.deltaTime;
+        public float NormalizedSpeed => GameSpeed / settings.MaxSpeed;
+        public float SpawnRate => Mathf.Lerp(settings.SpawnRate.From, settings.SpawnRate.From, NormalizedSpeed);
         public float DistanceTravelled { get; private set; } = 0f;
         [SerializeField] private GameSettings settings;
 
@@ -33,6 +36,19 @@ namespace Runtime.Game
             GameSpeed += settings.Acceleration * Time.deltaTime;
             if (GameSpeed > settings.MaxSpeed) GameSpeed = settings.MaxSpeed;
             DistanceTravelled += TravelSpeed;
+        }
+
+        public void GameOver()
+        {
+            OnGameEnd?.Invoke();
+            enabled = false;
+            GameSpeed = 0f;
+            Debug.Log("Game Over");
+        }
+
+        public void RestartGame()
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
     }
 }

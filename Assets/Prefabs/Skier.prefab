@@ -995,6 +995,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 2
   minConsumeScale: 0.9
-  damage: 1
   slopeObject: {fileID: 8518437834814487624}
   snowballObject: {fileID: 6078976201360740784}
+  pointValueType: 2

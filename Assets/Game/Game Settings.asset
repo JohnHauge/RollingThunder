@@ -15,3 +15,6 @@ MonoBehaviour:
   acceleration: 0.3
   maxSpeed: 10
   startSpeed: 1
+  spawnRate:
+    From: 0.5
+    To: 0.2

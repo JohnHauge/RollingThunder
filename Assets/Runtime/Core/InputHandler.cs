@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+
 using Runtime.Interfaces;
 using UnityEngine;
 
@@ -7,13 +7,13 @@ namespace Runtime.Core
     [RequireComponent(typeof(IMoveable))]
     public class InputHandler : MonoBehaviour
     {
-        private readonly List<IMoveable> _moveable = new();
+        private IMoveable _moveable;
         private InputListener _inputListener;
 
-        private void Awake() 
+        private void Awake()
         {
             _inputListener = gameObject.AddComponent<InputListener>();
-            _moveable.AddRange(GetComponents<IMoveable>());
+            _moveable = GetComponent<IMoveable>();
         }
 
         private void OnEnable()
@@ -32,9 +32,24 @@ namespace Runtime.Core
             _inputListener.OnDRelease -= OnDRelease;
         }
 
-        private void OnAPress() => _moveable.ForEach(movable => movable.OnMovePressed(Vector3.left));
-        private void OnDPress() => _moveable.ForEach(movable => movable.OnMovePressed(Vector3.right));
-        private void OnARelease() => _moveable.ForEach(movable => movable.OnMoveReleased(Vector3.left));
-        private void OnDRelease() => _moveable.ForEach(movable => movable.OnMoveReleased(Vector3.right));
+        private void OnAPress()
+        {
+            if (_moveable.CanMove) _moveable.OnMovePressed(Vector3.left);
+        }
+        
+        private void OnDPress()
+        {
+            if (_moveable.CanMove) _moveable.OnMovePressed(Vector3.right);
+        }
+
+        private void OnARelease()
+        {
+            if (_moveable.CanMove) _moveable.OnMoveReleased(Vector3.left);
+        }
+
+        private void OnDRelease()
+        {
+            if (_moveable.CanMove) _moveable.OnMoveReleased(Vector3.right);
+        }
     }
 }
