@@ -8,6 +8,7 @@ namespace Runtime.UI
     {
         [SerializeField] private GameObject title;
         [SerializeField] private GameObject startText;
+        [SerializeField] private GameObject howToPlay;
         [SerializeField] private AnimationCurve startTextCurve;
         [SerializeField] private float startTextDuration = 1f;
         [SerializeField] private float toStartTextScale = 1.5f;
@@ -16,6 +17,7 @@ namespace Runtime.UI
         {
             title.SetActive(true);
             startText.SetActive(true);
+            howToPlay.SetActive(true);
             StartCoroutine(StartTextRoutine());
             GameManager.OnGameStart += OnGameStart;
         }
@@ -24,6 +26,7 @@ namespace Runtime.UI
         {
             title.SetActive(false);
             startText.SetActive(false);
+            howToPlay.SetActive(false);
             GameManager.OnGameStart -= OnGameStart;
         }
 

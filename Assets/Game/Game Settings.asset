@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Game Settings
   m_EditorClassIdentifier: 
   acceleration: 0.3
-  maxSpeed: 10
-  startSpeed: 1
+  maxSpeed: 15
+  startSpeed: 3
   spawnRate:
     From: 0.5
-    To: 0.2
+    To: 0.1
