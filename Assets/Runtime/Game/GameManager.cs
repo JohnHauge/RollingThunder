@@ -10,6 +10,7 @@ namespace Runtime.Game
         public static GameManager Instance { get; private set; }
         public static event Action OnGameStart;
         public static event Action OnGameEnd;
+        public bool GameStarted { get; private set; } = false;
         public float GameSpeed { get; private set; } = 0f;
         public float TravelSpeed => GameSpeed * Time.deltaTime;
         public float NormalizedSpeed => GameSpeed / settings.MaxSpeed;
@@ -27,6 +28,7 @@ namespace Runtime.Game
         public void StartGame()
         {
             OnGameStart?.Invoke();
+            GameStarted = true;
             GameSpeed = settings.StartSpeed;
             enabled = true;
         }

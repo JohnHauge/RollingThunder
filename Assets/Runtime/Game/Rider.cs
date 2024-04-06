@@ -56,7 +56,7 @@ namespace Runtime.Game
 
         private IEnumerator OnFallRoutine()
         {
-            _animator.SetBool("IsPlaying", false);
+            _animator.SetTrigger("GameOver");
             var t = 0f;
             var fromPosition = transform.position;
             var targetPosition = transform.position;

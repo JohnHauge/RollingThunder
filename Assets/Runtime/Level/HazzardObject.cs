@@ -11,11 +11,14 @@ namespace Runtime.Level
         [SerializeField] private GameObject slopeObject;
         [SerializeField] private GameObject snowballObject;
         [SerializeField] private PointValueType pointValueType;
+        [SerializeField] private AudioClip hitSound;
+
         public override Snowball Snowball { get; set; }
 
         private void OnEnable()
         {
             move = true;
+            
             slopeObject.SetActive(true);
             snowballObject.SetActive(false);
         }
@@ -28,6 +31,8 @@ namespace Runtime.Level
 
         public override void OnHit(Snowball snowball)
         {
+            if (hitSound != null && TryGetComponent<AudioSource>(out var audioSource)) 
+                audioSource.PlayOneShot(hitSound);
             if (snowball.transform.localScale.x < minConsumeScale)
             {
                 GameManager.Instance.GameOver();

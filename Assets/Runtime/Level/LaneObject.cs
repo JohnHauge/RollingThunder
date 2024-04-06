@@ -17,7 +17,7 @@ namespace Runtime.Level
         
         public virtual void Update()
         {
-            if (!move) return;
+            if(!GameManager.Instance.GameStarted || !move) return;
             transform.position += Vector3.back * (GameManager.Instance.GameSpeed - speed) * Time.deltaTime;
             if(transform.position.z < -10) ReturnToPool();
         }

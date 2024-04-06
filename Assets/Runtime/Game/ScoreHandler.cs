@@ -7,11 +7,9 @@ namespace Runtime.Game
     {
         public static event Action<PointValueType> OnScore;
         public static event Action<int> OnScoreChange;
-        public static event Action<int> OnFinalScore;
-        public static event Action<int> OnHighScore;
-
-        private static int _score;
-
+        public static bool IsHighScore { get; private set; } = false;
+        public static int Score { get; private set; }
+        
         private void Start()
         {
             GameManager.OnGameStart += StartScoreTracking;
@@ -26,20 +24,24 @@ namespace Runtime.Game
 
         private void StartScoreTracking()
         {
-            _score = 0;
+            Score = 0;
+            OnScoreChange?.Invoke(Score);
         }
 
         private void StopScoreTracking()
         {
-            PlayerPrefs.SetInt(Constants.HighScoreKey, Mathf.Max(PlayerPrefs.GetInt(Constants.HighScoreKey), _score));
-            OnFinalScore?.Invoke(_score);
+            GameManager.OnGameStart -= StartScoreTracking;
+            GameManager.OnGameEnd -= StopScoreTracking;
+            var highScore = PlayerPrefs.GetInt(Constants.HighScoreKey, 0);
+            IsHighScore = Score > highScore;
+            if (IsHighScore) PlayerPrefs.SetInt(Constants.HighScoreKey, Score);
         }
 
         public static void AddScore(PointValueType value)
         {
-            _score += Constants.PointValues[value];
+            Score += Constants.PointValues[value];
             OnScore?.Invoke(value);
-            OnScoreChange?.Invoke(_score);
+            OnScoreChange?.Invoke(Score);
         }
     }
 }

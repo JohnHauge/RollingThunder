@@ -108,6 +108,7 @@ namespace Runtime.Game
         {
             CanMove = false;
             enabled = false;
+            virtualCamera.SetActive(false);
             StartCoroutine(RollOutRoutine());
         }
 
